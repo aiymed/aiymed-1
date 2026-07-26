@@ -53,10 +53,16 @@ app = FastAPI(
 # CORS sozlamalari - Frontend bilan ishlash uchun
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["http://localhost:5173", "http://127.0.0.1:5173"],  # Frontend manzillari
+    allow_origins=[
+        "http://localhost:5173", 
+        "http://127.0.0.1:5173",
+        "https://aiymed.vercel.app",  # Vercel sayti
+        "https://*.vercel.app",  # Barcha Vercel subdomenlari
+        "https://taunt-pantry-marlin.ngrok-free.dev"  # Ngrok
+    ],
     allow_credentials=True,
-    allow_methods=["*"],  # Barcha HTTP metodlari (GET, POST, va h.k.)
-    allow_headers=["*"],  # Barcha headerlar
+    allow_methods=["*"],
+    allow_headers=["*"],
 )
 
 # API yo'nalishlarini ulash
