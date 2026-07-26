@@ -31,9 +31,9 @@ function Orders() {
   const fetchData = async () => {
     try {
       const [clientsRes, productsRes, ordersRes] = await Promise.all([
-        fetch('http://127.0.0.1:8000/clients/'),
-        fetch('http://127.0.0.1:8000/products/'),
-        fetch('http://127.0.0.1:8000/orders/')
+        fetch('https://taunt-pantry-marlin.ngrok-free.dev/clients/'),
+        fetch('https://taunt-pantry-marlin.ngrok-free.dev/products/'),
+        fetch('https://taunt-pantry-marlin.ngrok-free.dev/orders/')
       ])
       
       if (clientsRes.ok) setClients(await clientsRes.json())
@@ -109,7 +109,7 @@ function Orders() {
     setLoading(true)
     
     try {
-      const response = await fetch('http://127.0.0.1:8000/orders/', {
+      const response = await fetch('https://taunt-pantry-marlin.ngrok-free.dev/orders/', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -152,7 +152,7 @@ function Orders() {
     if (!window.confirm(`Buyurtmani ${actionText}ga ishonchingiz komilmi?`)) return;
 
     try {
-      const response = await fetch(`http://127.0.0.1:8000/orders/${orderId}/status?status=${newStatus}`, {
+      const response = await fetch(`https://taunt-pantry-marlin.ngrok-free.dev/orders/${orderId}/status?status=${newStatus}`, {
         method: 'PATCH',
       });
 
@@ -396,7 +396,7 @@ function Orders() {
                       )}
                       {order.status === 'approved' && (
                         <a 
-                          href={`http://127.0.0.1:8000/orders/${order.id}/pdf`} 
+                          href={`https://taunt-pantry-marlin.ngrok-free.dev/orders/${order.id}/pdf`} 
                           target="_blank" 
                           rel="noopener noreferrer"
                           className="text-blue-600 hover:text-blue-800 text-xs font-bold"

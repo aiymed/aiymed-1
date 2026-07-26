@@ -16,7 +16,7 @@ function Login({ onLogin }) {
       formData.append('username', email)
       formData.append('password', password)
 
-      const response = await fetch('http://127.0.0.1:8000/login', {
+      const response = await fetch('https://taunt-pantry-marlin.ngrok-free.dev/login', {
         method: 'POST',
         body: formData,
       })

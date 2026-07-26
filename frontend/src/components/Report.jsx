@@ -11,7 +11,7 @@ function Report({ user }) {
   const fetchReport = async () => {
     try {
       // Hozircha user_id=1 (admin), keyin tokendan olamiz
-      const response = await fetch('http://127.0.0.1:8000/orders/report/1')
+      const response = await fetch('https://taunt-pantry-marlin.ngrok-free.dev/orders/report/1')
       if (response.ok) {
         const data = await response.json()
         setReport(data)

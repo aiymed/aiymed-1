@@ -18,7 +18,7 @@ function Clients() {
 
   const fetchClients = async () => {
     try {
-      const response = await fetch('http://127.0.0.1:8000/clients/')
+      const response = await fetch('https://taunt-pantry-marlin.ngrok-free.dev/clients/')
       if (response.ok) {
         const data = await response.json()
         setClients(data)
@@ -34,7 +34,7 @@ function Clients() {
     setLoading(true)
 
     try {
-      const response = await fetch('http://127.0.0.1:8000/clients/', {
+      const response = await fetch('https://taunt-pantry-marlin.ngrok-free.dev/clients/', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
