@@ -1,20 +1,27 @@
 # backend/app/schemas/user.py
 from pydantic import BaseModel, EmailStr
-
-class UserLogin(BaseModel):
-    email: EmailStr
-    password: str
+from typing import Optional
 
 class UserCreate(BaseModel):
     email: EmailStr
     password: str
     full_name: str
-    is_admin: bool = False
-    # backend/app/schemas/user.py
-from pydantic import BaseModel, EmailStr
+    role: str = "sales"  # admin, marketing, director, sales
+    region: Optional[str] = None
 
-class UserCreate(BaseModel):
-    email: EmailStr
-    password: str
+class UserUpdate(BaseModel):
     full_name: str
-    is_admin: bool = False
+    role: str
+    region: Optional[str] = None
+    password: Optional[str] = None
+
+class UserResponse(BaseModel):
+    id: int
+    email: str
+    full_name: str
+    role: str
+    region: Optional[str] = None
+    is_admin: bool
+
+    class Config:
+        from_attributes = True

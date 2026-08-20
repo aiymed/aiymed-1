@@ -1,4 +1,4 @@
-# database.py - Ma'lumotlar bazasi bilan bog'lanish
+# backend/app/database.py
 from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker, declarative_base
 from app.config import DATABASE_URL
@@ -10,7 +10,7 @@ SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
 # Modellar uchun asosiy klass
 Base = declarative_base()
 
-# Bazadan ma'lumot olish uchun yordamchi funksiya
+# Bazadan ma'lumot olish uchun yordamchi funksiya (Dependency)
 def get_db():
     db = SessionLocal()
     try:

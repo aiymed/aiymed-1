@@ -3,143 +3,170 @@ from fpdf import FPDF
 import os
 from datetime import datetime
 
-def generate_specification_pdf(order_data: dict, order_id: int):
-    """
-    Buyurtma ma'lumotlaridan PDF spetsifikatsiya yaratadi
-    """
-    try:
-        pdf = FPDF()
-        pdf.add_page()
-        pdf.set_auto_page_break(auto=True, margin=15)
-        
-        # Unicode shrift yuklash (DejaVu - o'zbekcha harflarni qo'llab-quvvatlaydi)
-        font_path = os.path.join(os.path.dirname(__file__), 'DejaVuSans.ttf')
-        
-        # Agar shrift fayli bo'lmasa, oddiy shriftdan foydalanamiz
-        if os.path.exists(font_path):
-            pdf.add_font('DejaVu', '', font_path, uni=True)
-            pdf.set_font('DejaVu', '', 12)
-        else:
-            # Agar shrift bo'lmasa, Windows shriftlaridan foydalanamiz
-            try:
-                pdf.add_font('Arial', '', 'C:/Windows/Fonts/arial.ttf', uni=True)
-                pdf.set_font('Arial', '', 12)
-            except:
-                # Oxirgi variant - standart shrift (lekin o'zbekcha ishlamaydi)
-                pdf.set_font('Helvetica', '', 12)
-        
-        # 1. Sarlavha
-        pdf.set_font_size(24)
-        pdf.set_font(style='B')
-        pdf.cell(0, 15, "AIYMED", ln=True, align='C')
-        
-        # To'lov turiga qarab sarlavha
-        payment_text = f"{order_data['payment_type']}% oldindan to'lov uchun Spetsifikatsiya"
-        pdf.set_font_size(12)
-        pdf.set_font(style='')
-        pdf.cell(0, 10, payment_text, ln=True, align='C')
-        pdf.ln(5)
-        
-        # 2. Spetsifikatsiya raqami va sana (№ belgisini "No" ga almashtiramiz)
-        today = datetime.now().strftime("%d.%m.%Y")
-        spec_number = f"Spetsifikatsiya raqami No{order_id} - {today} y."
-        pdf.cell(0, 10, spec_number, ln=True)
-        pdf.ln(5)
-        
-        # 3. Mijoz nomi
-        pdf.set_font(style='B')
-        pdf.cell(0, 10, f"Mijoz: {order_data['client_name']}", ln=True)
-        pdf.ln(10)
-        
-        # 4. Mahsulotlar jadvali
-        pdf.set_font(style='B')
-        pdf.set_font_size(10)
-        
-        # Jadval sarlavhalari
-        headers = ["No", "Mahsulot nomi", "Soni", "O'lchov birligi", "Narxi", "Summasi"]
-        col_widths = [12, 60, 18, 28, 27, 35]
-        
-        # Sarlavha qatori (och kulrang fon)
-        pdf.set_fill_color(230, 230, 230)
+def generate_specification_pdf(order_data, order_id):
+    pdf = FPDF()
+    pdf.add_page()
+    
+    # Windows tizimidagi Arial shriftidan foydalanamiz
+    font_path = "C:/Windows/Fonts/arial.ttf"
+    
+    if os.path.exists(font_path):
+        pdf.add_font('Arial', '', font_path, uni=True)
+        pdf.add_font('Arial', 'B', font_path, uni=True)
+        pdf.set_font('Arial', '', 12)
+        font_loaded = True
+    else:
+        pdf.set_font('helvetica', '', 12)
+        font_loaded = False
 
-        # Sarlavhani ikki qatorga chiqarish uchun balandlikni oshiramiz
-        for i, header in enumerate(headers):
-            pdf.cell(col_widths[i], 12, header, border=1, fill=True, align='C')
+    def clean_text(text):
+        if not font_loaded:
+            return str(text).replace("№", "No").replace("ё", "yo").replace("Ё", "YO").replace("ў", "o'").replace("ғ", "g'").replace("қ", "q").replace("ҳ", "h").replace("ш", "sh").replace("ч", "ch")
+        return str(text)
+
+    # ==========================================
+    # SARLAVHA QISMI
+    # ==========================================
+    pdf.set_font('Arial' if font_loaded else 'helvetica', 'B', 22)
+    pdf.cell(0, 15, "AIYMED", ln=True, align='C')
+    
+    pdf.set_font('Arial' if font_loaded else 'helvetica', '', 14)
+    payment_type = order_data.get('payment_type', 50)
+    pdf.cell(0, 10, f"{payment_type}% oldindan to'lov uchun Spetsifikatsiya", ln=True, align='C')
+    
+    pdf.ln(8)
+    
+    # Spetsifikatsiya raqami va sana
+    pdf.set_font('Arial' if font_loaded else 'helvetica', '', 12)
+    today = datetime.now().strftime("%d.%m.%Y")
+    pdf.cell(0, 8, f"Spetsifikatsiya raqami {clean_text('№')}{order_id} - {today} y.", ln=True)
+    
+    pdf.ln(5)
+    
+    # ==========================================
+    # MIJOZ MA'LUMOTLARI
+    # ==========================================
+    pdf.set_font('Arial' if font_loaded else 'helvetica', 'B', 12)
+    pdf.cell(0, 8, f"Mijoz: {clean_text(order_data.get('client_name', 'Noma\'lum'))}", ln=True)
+    
+    pdf.set_font('Arial' if font_loaded else 'helvetica', '', 11)
+    if order_data.get('client_inn'):
+        pdf.cell(0, 7, f"INN (STIR): {clean_text(order_data.get('client_inn'))}", ln=True)
+    if order_data.get('client_region'):
+        pdf.cell(0, 7, f"Hudud: {clean_text(order_data.get('client_region'))}", ln=True)
+    if order_data.get('client_contract'):
+        pdf.cell(0, 7, f"Shartnoma raqami: {clean_text(order_data.get('client_contract'))}", ln=True)
+    
+    pdf.ln(8)
+
+    # ==========================================
+    # JADVAL
+    # ==========================================
+    col_widths = [15, 65, 23, 28, 28, 28]
+    headers = [clean_text("№"), clean_text("Mahsulot nomi"), clean_text("Soni"), 
+               clean_text("O'lchov birligi"), clean_text("Narxi"), clean_text("Summasi")]
+    
+    # Jadval sarlavhasi (kulrang fon)
+    pdf.set_fill_color(220, 220, 220)
+    pdf.set_font('Arial' if font_loaded else 'helvetica', 'B', 10)
+    for i, header in enumerate(headers):
+        pdf.cell(col_widths[i], 10, header, border=1, align='C', fill=True)
+    pdf.ln()
+
+    # Mahsulotlar ro'yxati
+    pdf.set_font('Arial' if font_loaded else 'helvetica', '', 10)
+    total_sum = 0
+    
+    for idx, item in enumerate(order_data.get('items', []), start=1):
+        product_name = clean_text(str(item.get('product_name', 'Noma\'lum')))
+        if len(product_name) > 28:
+            product_name = product_name[:25] + "..."
+        
+        price = float(item.get('price', 0))
+        qty = int(item.get('quantity', 0))
+        item_total = float(item.get('total', price * qty))
+        total_sum += item_total
+        unit = clean_text(str(item.get('unit', 'dona')))
+
+        pdf.cell(col_widths[0], 9, str(idx), border=1, align='C')
+        pdf.cell(col_widths[1], 9, product_name, border=1)
+        pdf.cell(col_widths[2], 9, str(qty), border=1, align='C')
+        pdf.cell(col_widths[3], 9, unit, border=1, align='C')
+        pdf.cell(col_widths[4], 9, f"{price:,.0f}", border=1, align='R')
+        pdf.cell(col_widths[5], 9, f"{item_total:,.0f}", border=1, align='R')
         pdf.ln()
-        
-        # Mahsulotlar qatorlari
-        pdf.set_font(style='')
-        pdf.set_font_size(9)
-        items = order_data.get('items', [])
-        
-        for idx, item in enumerate(items, 1):
-            pdf.cell(col_widths[0], 8, str(idx), border=1, align='C')
-            pdf.cell(col_widths[1], 8, item.get('product_name', "Nomalum")[:22], border=1)
-            pdf.cell(col_widths[2], 8, str(item.get('quantity', 0)), border=1, align='C')
-            pdf.cell(col_widths[3], 8, item.get('unit', 'dona'), border=1, align='C')
-            pdf.cell(col_widths[4], 8, f"{item.get('price', 0):,.0f}", border=1, align='R')
-            pdf.cell(col_widths[5], 8, f"{item.get('total', 0):,.0f}", border=1, align='R')
-            pdf.ln()
-        
-        pdf.ln(3)
-        
-        # 5. Umumiy moliyaviy ma'lumotlar
-        pdf.set_font(style='B')
-        pdf.set_font_size(10)
-        
-        # Umumiy summa (och ko'k fon)
-        pdf.set_fill_color(220, 235, 255)
-        pdf.cell(118, 10, "Umumiy summasi:", border=1, align='L', fill=True)
-        pdf.cell(62, 10, f"{order_data['total_amount']:,.2f} so'm", border=1, align='R', fill=True)
-        pdf.ln()
-        
-        # QQS
-        pdf.set_font(style='')
-        pdf.cell(118, 8, "Shundan QQS summasi (12%):", border=0, align='L')
-        pdf.cell(62, 8, f"{order_data['vat_amount']:,.2f} so'm", border=0, align='R')
-        pdf.ln()
-        
-        # To'lov turi
-        # pdf.cell(118, 8, "To'lov turi:", border=0, align='L')
-        # pdf.cell(62, 8, f"{order_data['payment_type']}% oldindan", border=0, align='R')
-        # pdf.ln()
-        
-        # Oldindan to'lov
-        pdf.cell(118, 8, "Oldindan to'lov summasi:", border=0, align='L')
-        pdf.cell(62, 8, f"{order_data['prepayment_amount']:,.2f} so'm", border=0, align='R')
-        pdf.ln()
-        
-        # Qolgan qarz
-        pdf.cell(118, 8, "Qolgan qarz summasi:", border=0, align='L')
-        pdf.cell(62, 8, f"{order_data['remaining_amount']:,.2f} so'm", border=0, align='R')
-        pdf.ln(15)
-        
-        # 6. Imzo qismi
-        pdf.set_font(style='I')
-        pdf.set_font_size(9)
-        pdf.cell(0, 10, "Ushbu spetsifikatsiya AIYMED tizimi tomonidan avtomatik yaratildi.", ln=True)
-        pdf.ln(20)
-        
-        pdf.set_font(style='')
-        pdf.set_font_size(11)
-        pdf.cell(95, 10, "Savdo vakili: ___________________", ln=False)
-        pdf.cell(95, 10, "Mijoz: ___________________", ln=True)
-        
-        # Faylni saqlash
-        base_dir = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
-        output_dir = os.path.join(base_dir, 'static', 'specs')
-        os.makedirs(output_dir, exist_ok=True)
-        
-        file_name = f"spec_{order_id}.pdf"
-        file_path = os.path.join(output_dir, file_name)
-        
-        # PDF ni saqlash
-        pdf.output(file_path)
-        
-        return file_path
-        
-    except Exception as e:
-        print(f"PDF yaratishda xatolik: {str(e)}")
-        import traceback
-        traceback.print_exc()
-        raise
+
+    # ==========================================
+    # JAMI SUMMA (Ko'k fon)
+    # ==========================================
+    pdf.ln(3)
+    
+    pdf.set_fill_color(220, 235, 255)  # Och ko'k fon
+    pdf.set_font('Arial' if font_loaded else 'helvetica', 'B', 12)
+    
+    # Umumiy summa ustunlari
+    pdf.cell(col_widths[0] + col_widths[1] + col_widths[2] + col_widths[3], 10, 
+             "Umumiy summasi:", border=1, align='L', fill=True)
+    pdf.cell(col_widths[4] + col_widths[5], 10, 
+             f"{total_sum:,.2f} so'm", border=1, align='R', fill=True)
+    pdf.ln()
+
+    # ==========================================
+    # QQS, OLDINDAN TO'LOV, QARZ (ALOHIDA)
+    # ==========================================
+    pdf.ln(3)
+    
+    vat_amount = order_data.get('vat_amount', total_sum * 12 / 112)
+    prepayment_amount = order_data.get('prepayment_amount', total_sum * (payment_type / 100))
+    remaining_amount = order_data.get('remaining_amount', total_sum - prepayment_amount)
+    
+    pdf.set_font('Arial' if font_loaded else 'helvetica', '', 11)
+    
+    # QQS - sariq fonda, qalin
+    pdf.set_fill_color(255, 248, 220)  # Och sariq fon
+    pdf.set_font('Arial' if font_loaded else 'helvetica', 'B', 11)
+    pdf.cell(0, 9, f"Shundan QQS summasi (12%):", align='L')
+    pdf.cell(0, 9, f"{vat_amount:,.2f} so'm", align='R', fill=True)
+    pdf.ln()
+    
+    # Oldindan to'lov
+    pdf.set_font('Arial' if font_loaded else 'helvetica', '', 11)
+    pdf.cell(0, 9, f"Oldindan to'lov summasi ({payment_type}%):", align='L')
+    pdf.cell(0, 9, f"{prepayment_amount:,.2f} so'm", align='R')
+    pdf.ln()
+    
+    # Qolgan qarz
+    pdf.cell(0, 9, f"Qolgan qarz summasi:", align='L')
+    pdf.cell(0, 9, f"{remaining_amount:,.2f} so'm", align='R')
+    pdf.ln()
+
+    # ==========================================
+    # IZOVA
+    # ==========================================
+    pdf.ln(10)
+    pdf.set_font('Arial' if font_loaded else 'helvetica', 'I', 10)
+    pdf.cell(0, 7, "Ushbu spetsifikatsiya AIYMED tizimi tomonidan avtomatik yaratildi.", ln=True)
+
+    # ==========================================
+    # IMZO JOYLARI
+    # ==========================================
+    pdf.ln(15)
+    pdf.set_font('Arial' if font_loaded else 'helvetica', '', 11)
+    
+    pdf.cell(95, 10, "Savdo vakili: ________________________")
+    pdf.cell(0, 10, "Mijoz: ________________________", ln=True)
+    
+    pdf.ln(5)
+    pdf.cell(95, 10, "Sana: _______________")
+    pdf.cell(0, 10, "Muhur: _______________", ln=True)
+
+    # ==========================================
+    # FAYLNI SAQLASH
+    # ==========================================
+    save_dir = "pdfs"
+    os.makedirs(save_dir, exist_ok=True)
+    file_path = os.path.join(save_dir, f"Spetsifikatsiya_{order_id}.pdf")
+    
+    pdf.output(file_path)
+    
+    return file_path

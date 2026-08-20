@@ -1,79 +1,53 @@
-# backend/app/main.py (Faqat bosh qismini yangilaymiz)
-from fastapi.middleware.cors import CORSMiddleware
-from contextlib import asynccontextmanager
+# backend/app/main.py
 from fastapi import FastAPI
-from app.database import engine, Base, SessionLocal
-from app.models.user import User
-from app.models.client import Client      # YANGI
-from app.models.product import Product    
-from app.models.order import Order, OrderItem 
-from app.models.notification import Notification # YANGI
-from app.utils.auth import get_password_hash
-from app.routers import auth
-from app.routers import orders
-from app.routers import clients, products, admin
-from app.routers import notifications
+from fastapi.middleware.cors import CORSMiddleware
+from fastapi.staticfiles import StaticFiles  # ✅ Qo'shildi
+from fastapi.responses import FileResponse  # ✅ Qo'shildi
+from contextlib import asynccontextmanager
+from app.database import engine, Base
+from app.routers import auth, clients, products, orders, admin, notifications, inventory
+import os
 
-# 1. Ma'lumotlar bazasida jadvallarni yaratish
+# Database jadvallarini yaratish
 Base.metadata.create_all(bind=engine)
 
-# 2. Dastur ishga tushishi va to'xtashi uchun zamonaviy boshqaruv (Lifespan)
+# Uploads papkasini yaratish
+UPLOAD_DIR = "uploads"
+os.makedirs(UPLOAD_DIR, exist_ok=True)
+
 @asynccontextmanager
 async def lifespan(app: FastAPI):
-    # --- Dastur ishga tushganda (Startup) ---
-    db = SessionLocal()
-    admin_email = "aiymed@example.com"
-    
-    # Agar admin hali yaratilmagan bo'lsa, uni yaratamiz
-    if not db.query(User).filter(User.email == admin_email).first():
-        admin_user = User(
-            email=admin_email,
-            hashed_password=get_password_hash("aiymed2026"),
-            full_name="Super Admin",
-            is_admin=True
-        )
-        db.add(admin_user)
-        db.commit()
-        print("✅ Admin foydalanuvchi muvaffaqiyatli yaratildi!")
-    db.close()
-    
-    yield # Dastur shu yerda ishlaydi
-    
-    # --- Dastur to'xtaganda (Shutdown) ---
-    print("🛑 AIYMED dasturi to'xtatildi.")
+    print("✅ AIYMED API ishga tushdi!")
+    yield
 
-# 3. FastAPI ilovasini yaratish
 app = FastAPI(
     title="AIYMED API",
-    description="AIYMAN kompaniyasi uchun savdo va boshqaruv tizimi",
+    description="AIYMED boshqaruv tizimi API",
     version="1.0.0",
-    lifespan=lifespan  # Yuqoridagi funksiyani ulaymiz
+    lifespan=lifespan
 )
 
-# CORS sozlamalari - Frontend bilan ishlash uchun
+# ✅ STATIK FAYLLARNI SERVE QILISH (rasmlar uchun)
+app.mount("/uploads", StaticFiles(directory="uploads"), name="uploads")
+
+# CORS
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=[
-        "http://localhost:5173", 
-        "http://127.0.0.1:5173",
-        "https://aiymed.vercel.app",  # Vercel sayti
-        "https://*.vercel.app",  # Barcha Vercel subdomenlari
-        "https://taunt-pantry-marlin.ngrok-free.dev"  # Ngrok
-    ],
+    allow_origins=["*"],
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
 )
 
-# API yo'nalishlarini ulash
-app.include_router(auth.router, tags=["Autentifikatsiya"])
-app.include_router(orders.router, tags=["Buyurtmalar"]) # YANGI QO'SHILDI
-app.include_router(clients.router, tags=["Mijozlar (Kontragentlar)"]) # YANGI QO'SHILDI
-app.include_router(products.router, tags=["Mahsulotlar"]) # YANGI QO'SHILDI
-app.include_router(admin.router, tags=["Admin Paneli"]) # YANGI QO'SHILDI
-app.include_router(notifications.router, tags=["Habarnomalar"]) # YANGI QO'SHILDI
-# 5. Asosiy sahifa
+# Router'lar
+app.include_router(auth.router)
+app.include_router(clients.router)
+app.include_router(products.router)
+app.include_router(orders.router)
+app.include_router(admin.router)
+app.include_router(notifications.router)
+app.include_router(inventory.router)
+
 @app.get("/")
 def read_root():
-    return {"xabar": "AIYMED dasturi muvaffaqiyatli ishga tushdi!"}
-
+    return {"message": "AIYMED API muvaffaqiyatli ishga tushdi!"}

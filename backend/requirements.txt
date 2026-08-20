@@ -8,3 +8,5 @@ bcrypt
 pyjwt
 alembic
 fpdf2
+passlib
+python-jose

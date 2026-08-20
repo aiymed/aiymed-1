@@ -1,16 +1,27 @@
-# Backend - Python
-backend/__pycache__/
-backend/*.py[cod]
-backend/*.db
-backend/.env
-backend/venv/
-
-# Frontend - Node.js
+# Node modules
+node_modules/
 frontend/node_modules/
+backend/venv/
+backend/__pycache__/
+backend/.env
+
+# Build files
 frontend/dist/
 frontend/build/
 
-# Tizim fayllari
+# Environment variables
+.env
+.env.local
+
+# IDE files
+.vscode/
+.idea/
+
+# OS files
 .DS_Store
 Thumbs.db
-.vscode/
+desktop.ini
+
+# Logs
+*.log
+npm-debug.log*
