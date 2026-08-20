@@ -10,3 +10,4 @@ alembic
 fpdf2
 passlib
 python-jose
+python-multipart
