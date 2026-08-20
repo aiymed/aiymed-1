@@ -1,15 +1,13 @@
-# backend/app/main.py
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
-from fastapi.staticfiles import StaticFiles  # ✅ Qo'shildi
-from fastapi.responses import FileResponse  # ✅ Qo'shildi
+from fastapi.staticfiles import StaticFiles
+from fastapi.responses import FileResponse
 from contextlib import asynccontextmanager
-from app.database import engine, Base
+from app.database import engine, Base, SessionLocal  # ✅ SessionLocal qo'shildi
+from app.models.user import User  # ✅ User modeli qo'shildi
+from app.utils.auth import get_password_hash  # ✅ get_password_hash qo'shildi
 from app.routers import auth, clients, products, orders, admin, notifications, inventory
 import os
-
-# Database jadvallarini yaratish
-Base.metadata.create_all(bind=engine)
 
 # Uploads papkasini yaratish
 UPLOAD_DIR = "uploads"
@@ -17,6 +15,34 @@ os.makedirs(UPLOAD_DIR, exist_ok=True)
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
+    # Database jadvallarini yaratish
+    Base.metadata.create_all(bind=engine)
+    
+    # Admin foydalanuvchini yaratish (agar yo'q bo'lsa)
+    db = SessionLocal()
+    try:
+        admin_email = "admin@aiymed.uz"
+        admin_user = db.query(User).filter(User.email == admin_email).first()
+        if not admin_user:
+            admin_user = User(
+                email=admin_email,
+                full_name="Administrator",
+                hashed_password=get_password_hash("admin123"),
+                role="admin",
+                is_active=True
+            )
+            db.add(admin_user)
+            db.commit()
+            print("✅ Admin foydalanuvchi yaratildi!")
+            print(f"   Email: {admin_email}")
+            print(f"   Parol: admin123")
+        else:
+            print("✅ Admin foydalanuvchi allaqachon mavjud!")
+    except Exception as e:
+        print(f"❌ Admin yaratishda xato: {e}")
+    finally:
+        db.close()
+    
     print("✅ AIYMED API ishga tushdi!")
     yield
 
@@ -27,7 +53,7 @@ app = FastAPI(
     lifespan=lifespan
 )
 
-# ✅ STATIK FAYLLARNI SERVE QILISH (rasmlar uchun)
+# STATIK FAYLLARNI SERVE QILISH (rasmlar uchun)
 app.mount("/uploads", StaticFiles(directory="uploads"), name="uploads")
 
 # CORS
