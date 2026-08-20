@@ -56,10 +56,14 @@ app = FastAPI(
 # STATIK FAYLLARNI SERVE QILISH (rasmlar uchun)
 app.mount("/uploads", StaticFiles(directory="uploads"), name="uploads")
 
-# CORS
+# CORS (Eski kodni shu bilan almashtiring)
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["*"],
+    allow_origins=[
+        "https://joyful-macaron-f1ed26.netlify.app",  # Netlify saytingiz manzili
+        "http://localhost:5173",                      # Lokal test uchun (Vite)
+        "http://localhost:3000"                       # Lokal test uchun (React)
+    ],
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
