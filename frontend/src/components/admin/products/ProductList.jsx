@@ -60,7 +60,7 @@ function ProductList({ onNavigate, readOnly = false }) {
       header: t('productList.image'), 
       accessor: 'image_url',
       render: (value) => value ? (
-        <img src={`http://127.0.0.1:8000/${value}`} alt={t('productList.product_image_alt')} className="w-16 h-16 object-cover rounded" />
+        <img src={`https://aiymed-1.onrender.com${value}`} alt={t('productList.product_image_alt')} className="w-16 h-16 object-cover rounded" />
       ) : (
         <div className="w-16 h-16 bg-gray-200 rounded flex items-center justify-center text-gray-400">📷</div>
       )

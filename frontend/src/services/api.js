@@ -1,6 +1,6 @@
 // frontend/src/services/api.js
 
-const BASE_URL = 'http://127.0.0.1:8000'
+const BASE_URL = 'https://aiymed-1.onrender.com'
 
 // Asosiy fetch funksiyasi
 const apiRequest = async (endpoint, options = {}) => {

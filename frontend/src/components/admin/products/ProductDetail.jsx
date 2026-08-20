@@ -83,7 +83,7 @@ function ProductDetail({ productId, onBack, onEdit, readOnly = false, hideRetail
               className="cursor-pointer"
             >
               <img 
-                src={`http://127.0.0.1:8000/uploads/${product.image_url.replace('uploads/', '')}`} 
+                src={`https://aiymed-1.onrender.com${product.image_url.replace('uploads/', '')}`} 
                 alt={product.name}
                 className="w-full h-64 object-cover rounded-lg hover:opacity-90 transition"
                 onError={(e) => {
@@ -136,7 +136,7 @@ function ProductDetail({ productId, onBack, onEdit, readOnly = false, hideRetail
               ×
             </button>
             <img 
-              src={`http://127.0.0.1:8000/uploads/${product.image_url.replace('uploads/', '')}`} 
+              src={`https://aiymed-1.onrender.com${product.image_url.replace('uploads/', '')}`} 
               alt={product.name}
               className="max-w-full max-h-[90vh] object-contain rounded-lg"
             />
