@@ -1,14 +1,14 @@
 # Python 3.11
 fastapi==0.104.1
 uvicorn[standard]==0.24.0
-sqlalchemy
-psycopg2-binary
-pydantic
-python-dotenv
+sqlalchemy==2.0.23
+psycopg2-binary==2.9.9
+pydantic==2.5.0
+python-dotenv==1.0.0
 bcrypt==4.0.1
-pyjwt
-alembic
-fpdf2
-passlib[bcrypt]==1.7.4
-python-jose
+pyjwt==2.8.0
+alembic==1.12.1
+fpdf2==2.7.6
+passlib==1.7.4
+python-jose==3.3.0
 python-multipart
