@@ -5,12 +5,11 @@ from app.database import get_db
 from app.models.user import User, UserRole
 from pydantic import BaseModel, EmailStr
 from typing import Optional
-from passlib.context import CryptContext
+from app.utils.auth import get_password_hash  # ✅ O'ZGARGAN QATOR
 
 router = APIRouter(prefix="/admin", tags=["Admin"])
 
-# Password hashing
-pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
+# ✅ O'CHIRILDI: pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
 
 # ==========================================================
 # SCHEMAS
@@ -72,7 +71,7 @@ def create_user(user_data: UserCreate, db: Session = Depends(get_db)):
         raise HTTPException(status_code=400, detail="Bu email allaqachon ro'yxatdan o'tgan")
     
     # Parolni hash qilish
-    hashed_password = pwd_context.hash(user_data.password)
+    hashed_password = get_password_hash(user_data.password)  # ✅ O'ZGARGAN QATOR
     
     new_user = User(
         full_name=user_data.full_name,
@@ -108,7 +107,7 @@ def update_user(user_id: int, user_data: UserUpdate, db: Session = Depends(get_d
     
     # Parolni hash qilish (agar yangi parol berilgan bo'lsa)
     if 'password' in update_data and update_data['password']:
-        update_data['hashed_password'] = pwd_context.hash(update_data['password'])
+        update_data['hashed_password'] = get_password_hash(update_data['password'])  # ✅ O'ZGARGAN QATOR
         del update_data['password']
     
     for field, value in update_data.items():
