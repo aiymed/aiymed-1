@@ -5,13 +5,10 @@ from pydantic import BaseModel, EmailStr
 from typing import Optional
 from app.database import get_db
 from app.models.user import User, UserRole
-from passlib.context import CryptContext
+from app.utils.auth import verify_password, get_password_hash  # ✅ TO'G'RI IMPORT
 from datetime import datetime
 
 router = APIRouter(prefix="/auth", tags=["Autentifikatsiya"])
-
-# Parol hash qilish
-pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
 
 # Schemas
 class LoginRequest(BaseModel):
@@ -48,7 +45,7 @@ def login(request: LoginRequest, db: Session = Depends(get_db)):
         )
     
     # Parolni tekshirish
-    if not pwd_context.verify(request.password, user.hashed_password):
+    if not verify_password(request.password, user.hashed_password):  # ✅ TO'G'RI
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED,
             detail="Noto'g'ri email yoki parol"
@@ -78,7 +75,7 @@ def register(request: RegisterRequest, db: Session = Depends(get_db)):
         )
     
     # Yangi foydalanuvchi yaratish
-    hashed_password = pwd_context.hash(request.password)
+    hashed_password = get_password_hash(request.password)  # ✅ TO'G'RI
     
     new_user = User(
         full_name=request.full_name,
