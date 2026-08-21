@@ -26,7 +26,7 @@ export const productService = {
     const formData = new FormData()
     formData.append('file', file)
     
-    const response = await fetch(`https://aiymed-1.onrender.com/${productId}/upload-image`, {  // ✅ O'ZGARISH BU YERDA
+    const response = await fetch(`https://aiymed-1.onrender.com/products/${productId}/upload-image`, { // ✅ O'ZGARISH BU YERDA
       method: 'POST',
       body: formData
     })
