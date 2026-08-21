@@ -59,8 +59,8 @@ app.mount("/uploads", StaticFiles(directory="uploads"), name="uploads")
 # CORS (Vaqtinchalik barcha manzillarga ruxsat beramiz)
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["*"],  # Hozircha barcha saytlarga ruxsat
-    allow_credentials=False,  # "*" bilan birga False bo'lishi SHART
+    allow_origins=["*"],             # Barcha saytlarga ruxsat
+    allow_credentials=False,         # "*" ishlatilganda False bo'lishi SHART
     allow_methods=["*"],
     allow_headers=["*"],
 )
