@@ -5,7 +5,7 @@ sqlalchemy
 psycopg2-binary
 pydantic
 python-dotenv
-bcrypt>=4.1.2
+bcrypt==4.2.1
 pyjwt
 alembic
 fpdf2
